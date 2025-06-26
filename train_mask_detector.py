@@ -8,11 +8,11 @@ from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropou
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
 
-# Set random seed for reproducibility
+
 tf.random.set_seed(42)
 np.random.seed(42)
 
-# Define paths and parameters
+
 dataset_path = r"E:\python project\dataset"
 categories = ["with_mask", "without_mask"]
 labels = {"with_mask": 1, "without_mask": 0}
@@ -20,7 +20,7 @@ img_size = 128  # Resize images to 128x128
 batch_size = 32
 epochs = 15
 
-# Load and preprocess images
+
 images = []
 image_labels = []
 
@@ -57,7 +57,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     images, image_labels, test_size=0.2, random_state=42, stratify=image_labels
 )
 
-# Data augmentation
+
 datagen = ImageDataGenerator(
     rotation_range=20,
     width_shift_range=0.2,
@@ -68,7 +68,7 @@ datagen = ImageDataGenerator(
     fill_mode='nearest'
 )
 
-# Build CNN model
+
 model = Sequential([
     Conv2D(32, (3, 3), activation='relu', input_shape=(img_size, img_size, 1)),
     MaxPooling2D((2, 2)),
@@ -82,10 +82,10 @@ model = Sequential([
     Dense(1, activation='sigmoid')
 ])
 
-# Compile model
+
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
-# Train model with augmentation
+
 print("Training model...")
 history = model.fit(
     datagen.flow(X_train, y_train, batch_size=batch_size),
@@ -94,15 +94,15 @@ history = model.fit(
     verbose=1
 )
 
-# Evaluate model
+
 test_loss, test_accuracy = model.evaluate(X_test, y_test, verbose=0)
 print(f"Test Accuracy: {test_accuracy*100:.2f}%")
 
-# Save model
+
 model.save("face_mask_detector.h5")
 print("Model saved as face_mask_detector.h5")
 
-# Plot training history
+
 plt.figure(figsize=(12, 4))
 plt.subplot(1, 2, 1)
 plt.plot(history.history['accuracy'], label='Train Accuracy')
@@ -121,7 +121,7 @@ plt.ylabel('Loss')
 plt.legend()
 plt.show()
 
-# Real-time webcam testing (optional)
+
 def test_on_webcam():
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
@@ -135,18 +135,18 @@ def test_on_webcam():
             print("Error: Could not read frame.")
             break
         
-        # Preprocess frame
+       
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         resized = cv2.resize(gray, (img_size, img_size))
         normalized = resized / 255.0
         input_img = normalized.reshape(1, img_size, img_size, 1)
         
-        # Predict
+      
         prediction = model.predict(input_img, verbose=0)[0][0]
         label = "With Mask" if prediction > 0.5 else "Without Mask"
         confidence = prediction if prediction > 0.5 else 1 - prediction
         
-        # Display result
+        
         cv2.putText(frame, f"{label} ({confidence:.2f})", (10, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         cv2.imshow("Face Mask Detection", frame)
